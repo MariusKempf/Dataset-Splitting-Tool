@@ -1,8 +1,11 @@
 import os
-import pathlib
 
 from argparse import Namespace, ArgumentParser
-from utils.processing import pipeline
+from utils.trigger import trigger_pipeline
+
+from utils.utilities import build_dir_structure
+
+from utils.mnist_process import _make_splits
 
 
 def main_cli():
@@ -28,16 +31,22 @@ def main_cli():
 
 def main(args: Namespace):
 
-    # # create dataset and subset directories (if do not yet exist)
+    # create dataset and subset directories (if do not yet exist)
     if not os.path.exists(args.data_path)\
             and not os.path.exists(os.path.join(args.data_path, 'split_0')):
         os.mkdir(args.data_path)
         for i in range(args.splits):
             os.mkdir(os.path.join(args.data_path, f'split_{i}'))
 
-    # Start processing pipeline
-    pipeline(args)
+    # Start processing pipelines
+    trigger_pipeline(args, data_type='train')
+    trigger_pipeline(args, data_type='test')
 
+    #labels = [0,1,2,3,4]
+    #build_dir_structure(args, 'train', labels)
+    #build_dir_structure(args, labels)
+
+    #_make_splits(args, 'train')
 
 if __name__ == '__main__':
     args = main_cli()
