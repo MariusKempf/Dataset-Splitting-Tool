@@ -13,27 +13,29 @@ from utils.utilities import build_dir_structure
 
 
 def run_mnist_process(args: Namespace,
-                      data_type: str):
-    print(f'MNIST process (data: {data_type}) [START]')
+                      data_types):
 
-    # download
-    _download_mnist(args, data_type=data_type)
+    # iterate all data types given by dataset
+    for data_type in data_types:
+        print(f'MNIST process (data: {data_type}) [START]')
 
-    # load images
-    images, labels = _load_mnist(args, data_type=data_type)
+        # download
+        _download_mnist(args, data_type=data_type)
 
-    # generate images and label list
-    _generate_images(args, data_type, images, labels)
-    _generate_labellist(args, data_type, labels)
+        # load images
+        images, labels = _load_mnist(args, data_type=data_type)
 
-    # make splits
-    _make_splits(args, data_type=data_type)
+        # generate images and label list
+        _generate_images(args, data_type, images, labels)
+        _generate_labellist(args, data_type, labels)
 
-    # (optional) class distribution details
+        # make splits
+        _make_splits(args, data_type=data_type)
 
-    _clean_up(args)
+        # (optional) class distribution details
 
-    print(f'MNIST process (data: {data_type}) [DONE]')
+        _clean_up(args)
+        print(f'MNIST process (data: {data_type}) [DONE]')
 
 
 def _download_mnist(args: Namespace,

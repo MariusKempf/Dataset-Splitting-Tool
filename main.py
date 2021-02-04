@@ -9,7 +9,7 @@ def main_cli():
         description='''Tool to split a dataset into multiple subsets (each with train & test data)'''
     )
     parser.add_argument('-d', '--dataset', required=True,
-                        default='mnist', type=str,
+                        choices=['mnist', 'xray'], type=str,
                         help='Choose dataset you want to process'
                         )
     parser.add_argument('-n', '--splits', required=False,
@@ -35,8 +35,7 @@ def main(args: Namespace):
             os.mkdir(os.path.join(args.data_path, f'split_{i}'))
 
     # Start processing pipelines
-    trigger_pipeline(args, data_type='train')
-    trigger_pipeline(args, data_type='test')
+    trigger_pipeline(args)
 
 
 if __name__ == '__main__':
