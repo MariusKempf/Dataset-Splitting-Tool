@@ -1,13 +1,15 @@
 # MNIST-Splitting-Tool
-Splitting MNIST into n subsets
+Splitting a dataset into n subsets
 
+**Note:** until now only MNIST is supported!
 
+...
 
-
-
-### Generated structure
-
+The scripts are indented to store the data in such way, that it can easily be used by PyTorch ImageFolder.
+The following tree gives an example.
 ```
+The scripts produce the following structures:
+
 data/
 ├──split_0
 |   ├── train/
@@ -32,3 +34,4 @@ data/
 |   |   ├── class_0/
 ...
 ```
+

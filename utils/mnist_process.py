@@ -31,6 +31,8 @@ def run_mnist_process(args: Namespace,
 
     # (optional) class distribution details
 
+    _clean_up(args)
+
     print(f'MNIST process (data: {data_type}) [DONE]')
 
 
@@ -141,3 +143,9 @@ def _make_splits(args: Namespace,
                 target_dir = os.path.join(args.data_path, f'split_{idx}', data_type, str(label))
                 os.system(f'mv {filepath} {target_dir}')
     print(f'Reordering data [DONE]')
+
+
+def _clean_up(args: Namespace):
+    for folder in ['raw', 'processed']:
+        path = os.path.join(args.data_path, folder)
+        os.system(f'rm -d -r {path}')

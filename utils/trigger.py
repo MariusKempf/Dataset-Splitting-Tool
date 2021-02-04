@@ -8,4 +8,4 @@ def trigger_pipeline(args: Namespace,
     if args.dataset == 'mnist':
         run_mnist_process(args, data_type)
     else:
-        print()
+        print(f'[INFO] Dataset not supported yet! Stopping ...')
