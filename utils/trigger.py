@@ -4,8 +4,8 @@ from utils.mnist_process import run_mnist_process
 from utils.xray_process import run_xray_process
 
 
-def trigger_pipeline(args: Namespace,
-                     data_type: str = 'train'):
+def trigger_pipeline(args: Namespace):
+    """Starts dataset specific workflow"""
 
     if args.dataset == 'mnist':
         run_mnist_process(args, data_types=['train', 'test'])
