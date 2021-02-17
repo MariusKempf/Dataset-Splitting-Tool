@@ -9,8 +9,7 @@ def trigger_pipeline(args: Namespace):
 
     if args.dataset == 'mnist':
         run_mnist_process(args, data_types=['train', 'test'])
-    #elif args.dataset == 'chest-xray':
-    elif args.dataset == 'xray':
+    elif args.dataset == 'chest-xray':
         run_xray_process(args, data_types=['train', 'test', 'val'])
     else:
         print(f'[INFO] Dataset not supported yet! Stopping ...')

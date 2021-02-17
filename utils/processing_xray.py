@@ -20,20 +20,20 @@ def run_xray_process(args: Namespace,
         # distribute data into splits
         _distribute_images(args, data_type=data_type)
 
-        # _clean_up(args)
         print(f'Chest-XRAY process (data: {data_type}) [DONE]')
+
+    # clean up
+    _clean_up(args)
 
 
 def _download_xray(args: Namespace):
     data_archive = os.path.join(args.path, 'archive.zip')
-    print(data_archive)
 
     # check if data was downloaded
     if not os.path.exists(os.path.join(args.data_path, 'chest_xray')):
         if os.path.exists(data_archive):
             print('Unzipping data [START]')
             with zipfile.ZipFile(data_archive, 'r') as zf:
-                print(args.data_path)
                 zf.extractall(args.data_path)
             print('Unzipping data [DONE]')
         else:
@@ -71,6 +71,7 @@ def _clean_up(args, full=False):
         # Full clean-up
         os.system(f'rm -d -r {args.data_path}')
     else:
-        for folder in ['chest_xray', 'archive.zip']:
-            path = os.path.join(args.data_path, folder)
-            os.system(f'rm -d -r {path}')
+        path = os.path.join(args.path, 'archive.zip')
+        os.system(f'rm -d -r {path}')
+        path = os.path.join(args.data_path, 'chest_xray')
+        os.system(f'rm -d -r {path}')
