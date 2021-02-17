@@ -1,7 +1,6 @@
 import os
 import zipfile
 import numpy as np
-
 from argparse import Namespace
 
 from utils.utilities import build_dir_structure
@@ -11,6 +10,7 @@ def run_xray_process(args: Namespace,
                      data_types):
     # download
     if not _download_xray(args):
+        _clean_up(args, full=True)
         return False
 
     # iterate all data types given by dataset
@@ -20,8 +20,10 @@ def run_xray_process(args: Namespace,
         # distribute data into splits
         _distribute_images(args, data_type=data_type)
 
-        # _clean_up(args)
         print(f'Chest-XRAY process (data: {data_type}) [DONE]')
+
+    # final clean up
+    _clean_up(args)
 
 
 def _download_xray(args: Namespace):
@@ -38,7 +40,7 @@ def _download_xray(args: Namespace):
             print("[INFO] Data still needs to be downloaded!\n"
                   "Unfortunately, it is not possible to automate the download in this case.\n"
                   "Go to: https://www.kaggle.com/paultimothymooney/chest-xray-pneumonia\n"
-                  "Save archive into the intended directory - then run script again!\n")
+                  "Save archive into the intended directory - then run script again!")
             return False
     return True
 
@@ -64,6 +66,12 @@ def _distribute_images(args: Namespace,
     print(f'Reordering data [DONE]')
 
 
-def _clean_up(args):
-    path = os.path.join(args.data_path, 'chest_xray')
-    os.system(f'rm -d -r {path}')
+def _clean_up(args, full=False):
+    if full:
+        # Full clean-up
+        os.system(f'rm -d -r {args.data_path}')
+    else:
+        path = os.path.join(args.path, 'archive.zip')
+        os.system(f'rm -d -r {path}')
+        path = os.path.join(args.data_path, 'chest_xray')
+        os.system(f'rm -d -r {path}')

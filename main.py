@@ -9,7 +9,7 @@ def main_cli():
         description='''Tool to split a dataset into multiple subsets (each with train & test data)'''
     )
     parser.add_argument('-d', '--dataset', required=True,
-                        choices=['mnist', 'xray'], type=str,
+                        choices=['mnist', 'chest-xray'], type=str,
                         help='Choose dataset you want to process'
                         )
     parser.add_argument('-n', '--splits', required=False,

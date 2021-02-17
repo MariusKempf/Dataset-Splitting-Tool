@@ -26,16 +26,19 @@ def run_mnist_process(args: Namespace,
         images, labels = _load_mnist(args, data_type=data_type)
 
         # generate images and label list
+        print('preparing images and labels [START]')
         _generate_images(args, data_type, images, labels)
         _generate_labellist(args, data_type, labels)
+        print('preparing images and labels [DONE]')
 
         # make splits
         _make_splits(args, data_type=data_type)
 
         # (optional) class distribution details
-
-        _clean_up(args)
         print(f'MNIST process (data: {data_type}) [DONE]')
+
+    # final clean up
+    _clean_up(args)
 
 
 def _download_mnist(args: Namespace,
