@@ -22,7 +22,7 @@ def run_xray_process(args: Namespace,
 
         print(f'Chest-XRAY process (data: {data_type}) [DONE]')
 
-    # clean up
+    # final clean up
     _clean_up(args)
 
 
