@@ -11,7 +11,7 @@ field of Federated Learning where you have data distributed over multiple instan
 # MNIST
 python main.py -n 3 -d mnist -p /home/<user>/datasets
 # XRAY
-python main.py -n 3 -d xray -p /home/<user>/datasets
+python main.py -n 3 -d chest-xray -p /home/<user>/datasets
 ```
 
 ...
