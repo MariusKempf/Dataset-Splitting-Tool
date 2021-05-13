@@ -22,6 +22,10 @@ def run_xray_process(args: Namespace,
 
         print(f'Chest-XRAY process (data: {data_type}) [DONE]')
 
+    # copy test-img into new directory
+    test_imgs_dir = os.path.join(args.data_path, 'chest_xray', 'test')
+    os.system(f'cp -r {test_imgs_dir} {args.data_path}')
+
     # final clean up
     _clean_up(args)
 
@@ -66,7 +70,8 @@ def _distribute_images(args: Namespace,
     print(f'Reordering data [DONE]')
 
 
-def _clean_up(args, full=False):
+def _clean_up(args: Namespace,
+              full=False):
     if full:
         # Full clean-up
         os.system(f'rm -d -r {args.data_path}')
