@@ -9,10 +9,9 @@ def trigger_pipeline(args: Namespace):
 
     if args.dataset == 'mnist':
         print(f'[INFO] DATASET SPLITTING TOOL - processing: {args.dataset}')
-        run_mnist_process(args, data_types=['train', 'test'])
+        run_mnist_process(args)
     elif args.dataset == 'chest-xray':
-        # run_xray_process(args, data_types=['train', 'test', 'val'])
         print(f'[INFO] DATASET SPLITTING TOOL - processing: {args.dataset}')
-        run_xray_process(args, data_types=['train', 'val'])
+        run_xray_process(args)
     else:
         print(f'[INFO] Dataset not supported yet! Stopping ...')

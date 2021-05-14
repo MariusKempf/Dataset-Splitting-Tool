@@ -6,15 +6,15 @@ from argparse import Namespace
 from utils.utilities import build_dir_structure
 
 
-def run_xray_process(args: Namespace,
-                     data_types):
+def run_xray_process(args: Namespace):
+    
     # download
     if not _download_xray(args):
         _clean_up(args, full=True)
         return False
 
     # iterate all data types given by dataset
-    for data_type in data_types:
+    for data_type in ['train', 'val']:
         print(f'Chest-XRAY process (data: {data_type}) [START]')
 
         # distribute data into splits
