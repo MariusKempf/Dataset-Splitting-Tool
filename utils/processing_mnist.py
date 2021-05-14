@@ -12,18 +12,18 @@ from PIL import Image
 from utils.utilities import build_dir_structure
 
 
-def run_mnist_process(args: Namespace,
-                      data_types):
+def run_mnist_process(args: Namespace):
 
-    # iterate all data types given by dataset
-    for data_type in data_types:
-        print(f'MNIST process (data: {data_type}) [START]')
+    for data_type in ['train, test']:
+        print(f'Preparing MNIST (data: {data_type}) [START]')
 
         # download
         _download_mnist(args, data_type=data_type)
 
         # load images
+        print('Load images [START]')
         images, labels = _load_mnist(args, data_type=data_type)
+        print('Load images [DONE]')
 
         # generate images and label list
         print('preparing images and labels [START]')
@@ -31,19 +31,23 @@ def run_mnist_process(args: Namespace,
         _generate_labellist(args, data_type, labels)
         print('preparing images and labels [DONE]')
 
-        # make splits
-        _make_splits(args, data_type=data_type)
+        print(f'Preparing MNIST (data: {data_type}) [DONE]')
 
-        # (optional) class distribution details
-        print(f'MNIST process (data: {data_type}) [DONE]')
+    # split training data
+    _make_training_splits(args)
+
+    # split validation data & seperate test data
+    print(f'MNIST splitting validataion data [START]')
+
+    print(f'MNIST splitting validation data [DONE]')
 
     # final clean up
-    _clean_up(args)
+    #    _clean_up(args)
 
 
 def _download_mnist(args: Namespace,
                     data_type: str):
-    print(f'Downloading data [START]')
+    print(f'Data download [START]')
     raw_dir = os.path.join(args.data_path, 'raw')
     if not os.path.exists(raw_dir):
         os.mkdir(raw_dir)
@@ -58,13 +62,17 @@ def _download_mnist(args: Namespace,
     ]
     # run downloads
     for url in urls:
+        print(f'Downloading from: {url}')
         filepath = os.path.join(raw_dir, pathlib.Path(url).name)
         if not os.path.exists(filepath):
             response = requests.get(url)
             if response.status_code == 200:
                 with open(filepath, 'wb') as f:
                     f.write(response.content)
-    print(f'Downloading data [DONE]')
+            else:
+                print(f'Response status_code: {response.status_code}')
+                raise AssertionError ('MNIST download failed!')
+    print(f'Data download [DONE]')
 
 
 def _load_mnist(args: Namespace,
@@ -126,17 +134,17 @@ def _generate_labellist(args: Namespace,
     df.to_csv(path + f'/{data_type}.csv', index=False, header=False)
 
 
-def _make_splits(args: Namespace,
-                 data_type: str):
-    print(f'Reordering data [START]')
-    path_labels = os.path.join(args.data_path, 'processed', 'labels', data_type)
-    df = pd.read_csv(path_labels + f'/{data_type}.csv',
+def _make_training_splits(args: Namespace,):
+    print(f'Splitting training data [START]')
+
+    path_labels = os.path.join(args.data_path, 'processed', 'labels', 'train')
+    df = pd.read_csv(path_labels + '/train.csv',
                      names=['file', 'label'], header=None)
 
     classes = sorted(df['label'].unique())
-    build_dir_structure(args, data_type, classes)
+    build_dir_structure(args, 'train', classes)
 
-    path_imgs = os.path.join(args.data_path, 'processed', 'images', data_type)
+    path_imgs = os.path.join(args.data_path, 'processed', 'images', 'train')
     for label in classes:
         print(f'Processing class "{label}" ...')
         tmp = df.loc[df['label'] == label]
@@ -145,9 +153,70 @@ def _make_splits(args: Namespace,
         for idx, split in enumerate(splits):
             for file in split:
                 filepath = str(path_imgs + '/' + file)
-                target_dir = os.path.join(args.data_path, f'split_{idx}', data_type, str(label))
+                target_dir = os.path.join(args.data_path, f'split_{idx}', 'train', str(label))
                 os.system(f'mv {filepath} {target_dir}')
-    print(f'Reordering data [DONE]')
+
+    print(f'Splitting training data [DONE]')
+
+
+def _make_validation_splits(args: Namespace,):
+    print(f'MNIST splitting validataion data [START]')
+
+    print('MNIST comes with 10k images for testing/validation - these can be split for test/val')
+    test_fraction = float(input("What fraction (%) of the 10.000 images do you want for final testing (i.e. 0.25) ? "))
+
+    df_validation = _seperate_test_data()
+
+    print('#'*50, df_validation.shape)
+
+    classes = sorted(df_validation['label'].unique())
+    build_dir_structure(args, 'val', classes)
+
+    path_imgs = os.path.join(args.data_path, 'processed', 'images', 'val')
+    for label in classes:
+        print(f'Processing class "{label}" ...')
+        tmp = df_validation.loc[df_validation'label'] == label]
+        splits = np.array_split(tmp.file.to_list(), args.splits)
+
+        for idx, split in enumerate(splits):
+            for file in split:
+                filepath = str(path_imgs + '/' + file)
+                target_dir = os.path.join(args.data_path, f'split_{idx}', 'val', str(label))
+                os.system(f'mv {filepath} {target_dir}')
+
+    print(f'MNIST splitting validation data [DONE]')
+
+
+def _seperate_test_data(test_fraction : float):
+    """ """
+
+    path_imgs = os.path.join(args.data_path, 'processed', 'images', 'test')
+    path_labels = os.path.join(args.data_path, 'processed', 'labels', 'test')
+
+    df = pd.read_csv(path_labels + '/test.csv',
+                      names=['file', 'label'], header=None)
+    df_test = df.sample(frac=test_fraction)
+
+    print('#' * 50, df_test.shape)
+
+    # create folder structure for test data
+    classes = sorted(df['label'].unique())
+    for c in classes:
+        os.makedirs(os.path.join('test', str(c)))
+
+    # process imgs & labels
+    for label in classes:
+        tmp = df.loc[df['label'] == label]
+        file_list  = tmp.file.to_list()
+
+        for file in file_list:
+            filepath = path_imgs + '/' + file
+            #target_dir = os.path.join(args.data_path, 'test', str(label))
+            target_dir = os.path.join('test', str(label))
+            os.system(f'mv {filepath} {target_dir}')
+
+    # return dataframe without the entries used for testing data
+    return df.drop(df_test.index)
 
 
 def _clean_up(args: Namespace):
