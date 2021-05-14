@@ -159,13 +159,13 @@ def _make_training_splits(args: Namespace,):
     print(f'Splitting training data [DONE]')
 
 
-def _make_validation_splits(args: Namespace,):
+def _make_validation_splits(args: Namespace):
     print(f'MNIST splitting validataion data [START]')
-
     print('MNIST comes with 10k images for testing/validation - these can be split for test/val')
+    
     test_fraction = float(input("What fraction (%) of the 10.000 images do you want for final testing (i.e. 0.25) ? "))
 
-    df_validation = _seperate_test_data()
+    df_validation = _seperate_test_data(args, test_fraction)
 
     print('#'*50, df_validation.shape)
 
@@ -175,7 +175,7 @@ def _make_validation_splits(args: Namespace,):
     path_imgs = os.path.join(args.data_path, 'processed', 'images', 'val')
     for label in classes:
         print(f'Processing class "{label}" ...')
-        tmp = df_validation.loc[df_validation'label'] == label]
+        tmp = df_validation.loc[df_validation['label'] == label]
         splits = np.array_split(tmp.file.to_list(), args.splits)
 
         for idx, split in enumerate(splits):
@@ -187,32 +187,31 @@ def _make_validation_splits(args: Namespace,):
     print(f'MNIST splitting validation data [DONE]')
 
 
-def _seperate_test_data(test_fraction : float):
+def _seperate_test_data(args : Namespace, test_fraction : float):
     """ """
 
     path_imgs = os.path.join(args.data_path, 'processed', 'images', 'test')
     path_labels = os.path.join(args.data_path, 'processed', 'labels', 'test')
 
-    df = pd.read_csv(path_labels + '/test.csv',
-                      names=['file', 'label'], header=None)
+    df = pd.read_csv(path_labels + '/test.csv', names=['file', 'label'], header=None)
     df_test = df.sample(frac=test_fraction)
 
-    print('#' * 50, df_test.shape)
-
-    # create folder structure for test data
     classes = sorted(df['label'].unique())
+
+    print('#' * 50, df_test.shape)
+    
+    # create folder structure for test data
     for c in classes:
         os.makedirs(os.path.join('test', str(c)))
 
     # process imgs & labels
     for label in classes:
-        tmp = df.loc[df['label'] == label]
+        tmp = df_test.loc[df_test['label'] == label]
         file_list  = tmp.file.to_list()
 
         for file in file_list:
             filepath = path_imgs + '/' + file
-            #target_dir = os.path.join(args.data_path, 'test', str(label))
-            target_dir = os.path.join('test', str(label))
+            target_dir = os.path.join(args.data_path, 'test', str(label))
             os.system(f'mv {filepath} {target_dir}')
 
     # return dataframe without the entries used for testing data
