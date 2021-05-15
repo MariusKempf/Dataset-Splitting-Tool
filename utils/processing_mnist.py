@@ -14,11 +14,11 @@ from utils.utilities import build_dir_structure
 
 def run_mnist_process(args: Namespace):
 
-    for data_type in ['train, test']:
-        print(f'Preparing MNIST (data: {data_type}) [START]')
+    for data_type in ['train', 'test']:
+        print(f'Preparing (data: {data_type}) [START]')
 
         # download
-        _download_mnist(args, data_type=data_type)
+        #_download_mnist(args, data_type=data_type)
 
         # load images
         print('Load images [START]')
@@ -26,23 +26,19 @@ def run_mnist_process(args: Namespace):
         print('Load images [DONE]')
 
         # generate images and label list
-        print('preparing images and labels [START]')
+        print('Generate images and labels [START]')
         _generate_images(args, data_type, images, labels)
         _generate_labellist(args, data_type, labels)
-        print('preparing images and labels [DONE]')
+        print('Generate images and labels [DONE]')
 
-        print(f'Preparing MNIST (data: {data_type}) [DONE]')
+        print(f'Preparing (data: {data_type}) [DONE]')
 
-    # split training data
+    # split data
     _make_training_splits(args)
-
-    # split validation data & seperate test data
-    print(f'MNIST splitting validataion data [START]')
-
-    print(f'MNIST splitting validation data [DONE]')
+    _make_validation_splits(args)
 
     # final clean up
-    #    _clean_up(args)
+    _clean_up(args)
 
 
 def _download_mnist(args: Namespace,
@@ -167,12 +163,12 @@ def _make_validation_splits(args: Namespace):
 
     df_validation = _seperate_test_data(args, test_fraction)
 
-    print('#'*50, df_validation.shape)
+    print('Using {} samples as validation data in total'.format(df_validation.shape[0]))
 
     classes = sorted(df_validation['label'].unique())
     build_dir_structure(args, 'val', classes)
 
-    path_imgs = os.path.join(args.data_path, 'processed', 'images', 'val')
+    path_imgs = os.path.join(args.data_path, 'processed', 'images', 'test')
     for label in classes:
         print(f'Processing class "{label}" ...')
         tmp = df_validation.loc[df_validation['label'] == label]
@@ -195,17 +191,18 @@ def _seperate_test_data(args : Namespace, test_fraction : float):
 
     df = pd.read_csv(path_labels + '/test.csv', names=['file', 'label'], header=None)
     df_test = df.sample(frac=test_fraction)
+    
+    classes = sorted(df_test['label'].unique())
 
-    classes = sorted(df['label'].unique())
-
-    print('#' * 50, df_test.shape)
+    print('Using {} samples as testing data'.format(df_test.shape[0]))
     
     # create folder structure for test data
     for c in classes:
-        os.makedirs(os.path.join('test', str(c)))
+        os.makedirs(os.path.join(args.data_path, 'test', str(c)))
 
     # process imgs & labels
     for label in classes:
+        print(f'Processing class "{label}" ...')
         tmp = df_test.loc[df_test['label'] == label]
         file_list  = tmp.file.to_list()
 
