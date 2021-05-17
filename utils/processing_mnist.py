@@ -18,7 +18,7 @@ def run_mnist_process(args: Namespace):
         print(f'Preparing (data: {data_type}) [START]')
 
         # download
-        #_download_mnist(args, data_type=data_type)
+        _download_mnist(args, data_type=data_type)
 
         # load images
         print('Load images [START]')
@@ -56,6 +56,7 @@ def _download_mnist(args: Namespace,
         f'{baseurl}/{data_type}-images-idx3-ubyte.gz',
         f'{baseurl}/{data_type}-labels-idx1-ubyte.gz'
     ]
+
     # run downloads
     for url in urls:
         print(f'Downloading from: {url}')
@@ -66,8 +67,7 @@ def _download_mnist(args: Namespace,
                 with open(filepath, 'wb') as f:
                     f.write(response.content)
             else:
-                print(f'Response status_code: {response.status_code}')
-                raise AssertionError ('MNIST download failed!')
+                raise AssertionError(f'MNIST download failed! - Response status_code: {response.status_code}')
     print(f'Data download [DONE]')
 
 
@@ -130,7 +130,7 @@ def _generate_labellist(args: Namespace,
     df.to_csv(path + f'/{data_type}.csv', index=False, header=False)
 
 
-def _make_training_splits(args: Namespace,):
+def _make_training_splits(args: Namespace):
     print(f'Splitting training data [START]')
 
     path_labels = os.path.join(args.data_path, 'processed', 'labels', 'train')
@@ -156,12 +156,12 @@ def _make_training_splits(args: Namespace,):
 
 
 def _make_validation_splits(args: Namespace):
-    print(f'MNIST splitting validataion data [START]')
+    print(f'MNIST splitting validation data [START]')
     print('MNIST comes with 10k images for testing/validation - these can be split for test/val')
     
     test_fraction = float(input("What fraction (%) of the 10.000 images do you want for final testing (i.e. 0.25) ? "))
 
-    df_validation = _seperate_test_data(args, test_fraction)
+    df_validation = _separate_test_data(args, test_fraction)
 
     print('Using {} samples as validation data in total'.format(df_validation.shape[0]))
 
@@ -183,8 +183,7 @@ def _make_validation_splits(args: Namespace):
     print(f'MNIST splitting validation data [DONE]')
 
 
-def _seperate_test_data(args : Namespace, test_fraction : float):
-    """ """
+def _separate_test_data(args: Namespace, test_fraction: float):
 
     path_imgs = os.path.join(args.data_path, 'processed', 'images', 'test')
     path_labels = os.path.join(args.data_path, 'processed', 'labels', 'test')
@@ -200,11 +199,11 @@ def _seperate_test_data(args : Namespace, test_fraction : float):
     for c in classes:
         os.makedirs(os.path.join(args.data_path, 'test', str(c)))
 
-    # process imgs & labels
+    # process images & labels
     for label in classes:
         print(f'Processing class "{label}" ...')
         tmp = df_test.loc[df_test['label'] == label]
-        file_list  = tmp.file.to_list()
+        file_list = tmp.file.to_list()
 
         for file in file_list:
             filepath = path_imgs + '/' + file
